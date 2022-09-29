@@ -1,0 +1,12 @@
+{
+  "${ModID}:AscensionPrefix": {
+    "TEXT": [
+      "Disabled.",
+	  "(Max Level) ",
+	  "Extra",
+	  "Extra Ascensions",
+	  "Here you can select and manage all additional ascension mods downloaded",
+	  "Reset all"
+    ]
+  }
+}
