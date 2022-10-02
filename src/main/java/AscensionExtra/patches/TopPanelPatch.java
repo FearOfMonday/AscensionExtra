@@ -1,6 +1,6 @@
 package AscensionExtra.patches;
 
-import AscensionExtra.buttons.AscensionManager;
+import AscensionExtra.AscensionManager;
 import AscensionExtra.AscensionMod;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;

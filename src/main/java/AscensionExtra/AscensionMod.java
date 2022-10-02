@@ -1,6 +1,5 @@
 package AscensionExtra;
 
-import AscensionExtra.buttons.AscensionManager;
 import AscensionExtra.util.TexLoader;
 import basemod.*;
 import basemod.abstracts.CustomSavable;
@@ -18,12 +17,14 @@ public class AscensionMod implements EditStringsSubscriber, PostInitializeSubscr
     public static final Logger LOGGER = LogManager.getLogger(AscensionMod.class.getName());
     public static final String MOD_ID = "ascensionmanager";
     public static final String AUTHOR = "FearOfMonday";
-    public static final String DESCRIPTION = "Allows for multiple custom Ascension to be registered and used simutaniously without conflict, similar to Hades' heat system.";
+    public static final String DESCRIPTION = "Allows for multiple custom Ascension to be registered and used simultaneously without conflict, similar to Hades' heat system.";
 
     public static String makePath(String resourcePath) {
         return MOD_ID + "Resources/" + resourcePath;
     }
     public static final String BADGE_IMAGE = makePath("images/Badge.png");
+
+    public static ModLabel label;
 
     private static AscensionMod mod;
     private boolean ascenionExtraActivated;
@@ -45,9 +46,26 @@ public class AscensionMod implements EditStringsSubscriber, PostInitializeSubscr
     @Override
     public void receivePostInitialize() {
         AscensionManager.init();
+
         BaseMod.addSaveField("ascensionmanager:isActivated", this);
         Texture badgeTexture = TexLoader.getTexture(BADGE_IMAGE);
-        BaseMod.registerModBadge(badgeTexture, MOD_ID, AUTHOR, DESCRIPTION, new ModPanel());
+        ModPanel settingsPanel = new ModPanel();
+
+        label = new ModLabel("", 450.0F, 680.0F, settingsPanel, me -> {
+            if (me.parent.waitingOnEvent) {
+                me.text = "Press key";
+            } else {
+                me.text = "Change console hotkey";
+            }
+        });
+        settingsPanel.addUIElement(label);
+        ModButton moderButton = new ModButton(350.0f, 650.0F,
+                settingsPanel, button -> AscensionManager.unlockAllRegistered());
+        settingsPanel.addUIElement(moderButton);
+
+
+
+        BaseMod.registerModBadge(badgeTexture, MOD_ID, AUTHOR, DESCRIPTION, settingsPanel);
     }
 
     @Override

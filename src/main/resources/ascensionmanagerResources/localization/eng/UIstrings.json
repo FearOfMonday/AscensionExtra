@@ -8,5 +8,10 @@
 	  "Here you can select and manage all additional ascension mods downloaded",
 	  "Reset all"
     ]
+  },
+    "${ModID}:ModSettings": {
+    "TEXT": [
+      "Instantly unlock the following ascension modifiers: "
+    ]
   }
 }

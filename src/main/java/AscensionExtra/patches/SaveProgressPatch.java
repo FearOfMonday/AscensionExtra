@@ -1,6 +1,6 @@
 package AscensionExtra.patches;
 
-import AscensionExtra.buttons.AscensionManager;
+import AscensionExtra.AscensionManager;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;

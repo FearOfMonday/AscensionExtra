@@ -1,5 +1,6 @@
 package AscensionExtra.buttons;
 
+import AscensionExtra.AscensionManager;
 import AscensionExtra.util.TexLoader;
 import basemod.ClickableUIElement;
 import com.badlogic.gdx.graphics.Color;

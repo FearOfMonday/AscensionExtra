@@ -1,6 +1,6 @@
 package AscensionExtra.patches;
 
-import AscensionExtra.buttons.AscensionManager;
+import AscensionExtra.AscensionManager;
 import AscensionExtra.AscensionMod;
 import AscensionExtra.buttons.AscensionData;
 import com.evacipated.cardcrawl.modthespire.lib.*;

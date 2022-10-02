@@ -1,5 +1,6 @@
 package AscensionExtra.buttons;
 
+import AscensionExtra.AscensionManager;
 import AscensionExtra.util.TexLoader;
 import basemod.ClickableUIElement;
 import com.badlogic.gdx.graphics.Color;
@@ -7,6 +8,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireConfig;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
@@ -20,10 +22,10 @@ import static AscensionExtra.AscensionMod.*;
 public class AscensionData extends ClickableUIElement {
     private static Texture highlightImg = null;
     public String name;
-    protected String id;
-    protected String[] ascInfo;
-    protected int uniqueCounter;
-    protected boolean clicked;
+    public String id;
+    public String[] ascInfo;
+    public int uniqueCounter;
+    public boolean clicked;
     private boolean hovered;
     private int unlockedLvls;
     private boolean locked;
@@ -31,14 +33,14 @@ public class AscensionData extends ClickableUIElement {
     private Color imageColor;
     private Color highlightColor = new Color(1.0F, 1.0F, 1.0F, 0.0F);
 
-    public AscensionData(Texture img, String id, String name, String[] ascInfo, boolean locked) {
+    public AscensionData(String img, String id, String name, String[] ascInfo, boolean locked) {
         super((Texture) null, 0.0F, 0.0F, 350.0F, 40.0F);
         this.id = id;
         this.ascInfo = ascInfo;
         this.name = name;
         this.locked = locked;
-        if (img != null) {
-            image = img;
+        if (img != null && !img.equals("")) {
+            image = TexLoader.getTexture(img);
             imageColor = Color.WHITE;
         } else {
             image = TexLoader.getTexture(makePath("images/default_asc.png"));
@@ -81,7 +83,7 @@ public class AscensionData extends ClickableUIElement {
     public void updateUnlockable() {
         if (unlockedLvls < ascInfo.length && uniqueCounter == unlockedLvls) {
             try {
-                SpireConfig config = new SpireConfig(MOD_ID, "ascensionManager_" + id + "_Config");
+                SpireConfig config = new SpireConfig(MOD_ID, "am-" + id + "-config");
                 config.load();
                 config.setInt("ascensionmanager:" + AscensionManager.p.name() + "_ul", unlockedLvls + 1);
                 config.save();
@@ -97,7 +99,7 @@ public class AscensionData extends ClickableUIElement {
         if (uniqueCounter <= 0) uniqueCounter = 0;
         if (AscensionManager.p != null) {
             try {
-                SpireConfig config = new SpireConfig(MOD_ID, "ascensionManager_" + id + "_Config");
+                SpireConfig config = new SpireConfig(MOD_ID, "am-" + id + "-config");
                 config.load();
                 config.setInt("ascensionmanager:" + AscensionManager.p.name() + "_uc", uniqueCounter);
                 config.save();
@@ -112,7 +114,7 @@ public class AscensionData extends ClickableUIElement {
         unlockedLvls = locked ? 1 : ascInfo.length;
         if (AscensionManager.p != null) {
             try {
-                SpireConfig config = new SpireConfig(MOD_ID, "ascensionManager_" + id + "_Config");
+                SpireConfig config = new SpireConfig(MOD_ID, "am-" + id + "-config");
                 config.load();
                 if (config.has("ascensionmanager:" + AscensionManager.p.name() + "_ul")) unlockedLvls = config.getInt("ascensionmanager:" + AscensionManager.p.name() + "_ul");
                 if (config.has("ascensionmanager:" + AscensionManager.p.name() + "_uc")) uniqueCounter = config.getInt("ascensionmanager:" + AscensionManager.p.name() + "_uc");
@@ -122,11 +124,6 @@ public class AscensionData extends ClickableUIElement {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void setLvlAndText() {
-        CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel = uniqueCounter;
-        CardCrawlGame.mainMenuScreen.charSelectScreen.ascLevelInfoString = uniqueCounter > 0 ? ascInfo[uniqueCounter - 1] : AscensionManager.TEXT[0];
     }
 
     @Override
@@ -147,6 +144,24 @@ public class AscensionData extends ClickableUIElement {
             saveLvl();
             setLvlAndText();
         } else AscensionManager.resetTxtNLvl();
+    }
+
+    public void setLvlAndText() {
+        CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel = uniqueCounter;
+        CardCrawlGame.mainMenuScreen.charSelectScreen.ascLevelInfoString = uniqueCounter > 0 ? ascInfo[uniqueCounter - 1] : AscensionManager.TEXT[0];
+    }
+
+    public void unlock() {
+        locked = false;
+        int tmp = uniqueCounter;
+        unlockedLvls = ascInfo.length - 1;
+        uniqueCounter = unlockedLvls;
+        for (AbstractPlayer.PlayerClass p : AbstractPlayer.PlayerClass.values()) {
+            AscensionManager.p = p;
+            updateUnlockable();
+        }
+        AscensionManager.p = null;
+        uniqueCounter = tmp;
     }
 
     @Override

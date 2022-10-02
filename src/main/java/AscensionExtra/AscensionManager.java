@@ -1,6 +1,9 @@
-package AscensionExtra.buttons;
+package AscensionExtra;
 
-import AscensionExtra.AscensionMod;
+import AscensionExtra.buttons.AscensionData;
+import AscensionExtra.buttons.AscensionExtraButton;
+import AscensionExtra.buttons.DisableAllButton;
+import AscensionExtra.buttons.PageIncreaseButton;
 import AscensionExtra.util.TexLoader;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -14,6 +17,8 @@ import com.megacrit.cardcrawl.screens.charSelect.CharacterSelectScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import static AscensionExtra.AscensionMod.*;
@@ -24,7 +29,8 @@ public class AscensionManager {
     public static final String[] TEXT = uiStrings.TEXT;
     private static final int MAX_PER_SIDE = 12;
     private static ArrayList<AscensionData> data = new ArrayList<>();
-    private static Texture front = TexLoader.getTexture(makePath("images/front.png"));
+    private static ArrayList<String> unLockables = new ArrayList<>();
+    private static final Texture FRONT = TexLoader.getTexture(makePath("images/front.png"));
     public static AbstractPlayer.PlayerClass p = null;
     private static AscensionExtraButton exButton;
     private static PageIncreaseButton pIncreaseButton;
@@ -174,6 +180,12 @@ public class AscensionManager {
         }
     }
 
+    public static void unlockAllRegistered() {
+        for (String s : unLockables) {
+            unlockAscension(s);
+        }
+    }
+
     public static void update(CharacterSelectScreen ch) {
         exButton.setClickable(ch.isAscensionMode);
         exButton.update();
@@ -198,7 +210,7 @@ public class AscensionManager {
             }
             resetButton.render(sb);
             sb.setColor(Color.WHITE);
-            sb.draw(front, Settings.WIDTH / 2.0F + 400.0F * Settings.scale, 270 * Settings.scale, front.getWidth() * Settings.scale, front.getHeight() * Settings.scale);
+            sb.draw(FRONT, Settings.WIDTH / 2.0F + 400.0F * Settings.scale, 270 * Settings.scale, FRONT.getWidth() * Settings.scale, FRONT.getHeight() * Settings.scale);
             if (getSize() > MAX_PER_SIDE) pIncreaseButton.render(sb);
         }
     }
@@ -207,18 +219,35 @@ public class AscensionManager {
         addAscensionData(null, id, name, ascInfo);
     }
 
-    public static void addAscensionData(Texture img, String id, String name, String[] ascInfo) {
-        addAscensionData(img, id, name, ascInfo, false);
+    public static void addAscensionData(String imgPath, String id, String name, String[] ascInfo) {
+        addAscensionData(imgPath, id, name, ascInfo, false);
     }
 
-    public static void addAscensionData(Texture img, String id, String name, String[] ascInfo, boolean locked) {
+    public static void addAscensionData(String imgPath, String id, String name, String[] ascensionText, boolean locked) {
+        id = id.replace(":", "");
+        try {
+            Paths.get(id);
+        } catch (InvalidPathException | NullPointerException ex) {
+            LOGGER.info("Following ID cannot be used as file name, thus your data cannot be saved!!!");
+            LOGGER.info("It is adviced to change it in order to avoid issues.");
+        }
         for (AscensionData d : data) {
             if (d.id.equals(id)) {
                 LOGGER.info("Following ID is already registered: " + id);
                 LOGGER.info("It is adviced to change it in order to avoid issues.");
             }
         }
-        data.add(new AscensionData(img, id, name, ascInfo, locked));
+        data.add(new AscensionData(imgPath, id, name, ascensionText, locked));
+    }
+
+    public static AscensionData getAscensionData(String id) {
+        if (AscensionMod.isActivated()) {
+            for (AscensionData d : data) {
+                if (d.id.equals(id)) return d;
+            }
+
+        }
+        return null;
     }
 
     public static int getAscensionLvl(String id) {
@@ -229,5 +258,19 @@ public class AscensionManager {
             LOGGER.info("Could not find data for ID: " + id);
         }
         return 0;
+    }
+
+    public static boolean isLvlActive(String id, int lvl) {
+        return getAscensionLvl(id) >= lvl;
+    }
+
+    public static void unlockAscension(String id) {
+        for (AscensionData d : data) {
+            if (d.id.equals(id)) d.unlock();
+        }
+    }
+
+    public static void registerAsUnlockable(String id) {
+        if (!unLockables.contains(id)) unLockables.add(id);
     }
 }
