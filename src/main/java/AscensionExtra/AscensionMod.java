@@ -49,9 +49,9 @@ public class AscensionMod implements EditStringsSubscriber, PostInitializeSubscr
 
     public static AbstractPlayer.PlayerClass p = null;
     public static String[] TEXT;
-    public static float loopLabelTime = 0.0F;
-    public static int loopLabelIndex = 0;
 
+    private static float loopLabelTime = 0.0F;
+    private static int loopLabelIndex = 0;
     private static Texture FRONT;
     private static AscensionMod.AscensionManager manager;
 
