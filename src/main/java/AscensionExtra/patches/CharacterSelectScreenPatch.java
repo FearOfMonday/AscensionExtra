@@ -1,6 +1,5 @@
 package AscensionExtra.patches;
 
-import AscensionExtra.AscensionManager;
 import AscensionExtra.AscensionMod;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
@@ -13,14 +12,21 @@ import javassist.CtBehavior;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 
+@SuppressWarnings("unused")
 public class CharacterSelectScreenPatch {
+
+    private static AscensionMod.AscensionManager manager;
+
+    public static void addManager(AscensionMod.AscensionManager man) {
+        manager = man;
+    }
 
     @SpirePatch2(clz = CharacterSelectScreen.class, method = "initialize")
     public static class InitButtons {
 
         @SpirePostfixPatch
         public static void init() {
-            AscensionManager.initButtons();
+            manager.initButtons();
         }
     }
 
@@ -29,8 +35,8 @@ public class CharacterSelectScreenPatch {
 
         @SpirePostfixPatch
         public static void buttona(CharacterSelectScreen __instance) {
-            if (AscensionManager.p != null && AscensionManager.hasButtons()) {
-                AscensionManager.update(__instance);
+            if (AscensionMod.p != null && manager.hasButtons()) {
+                manager.update(__instance);
             }
         }
     }
@@ -42,8 +48,8 @@ public class CharacterSelectScreenPatch {
 
         @SpirePostfixPatch
         public static void buttona(@ByRef SpriteBatch[] sb) {
-            if (AscensionManager.p != null && AscensionManager.hasButtons()) {
-                AscensionManager.render(sb[0]);
+            if (AscensionMod.p != null && manager.hasButtons()) {
+                manager.render(sb[0]);
             }
         }
 
@@ -67,18 +73,18 @@ public class CharacterSelectScreenPatch {
 
         @SpireInsertPatch(locator = Locator.class)
         public static void hideExButtonWhenCancel() {
-            AscensionManager.p = null;
-            AscensionManager.disableAll();
-            AscensionMod.setBool(false);
+            AscensionMod.p = null;
+            manager.disableAll();
+            manager.isActive = false;
         }
 
         @SpireInsertPatch(locator = Locator2.class)
         public static void restoreAscensionLevelWhenProgress() {
-            AscensionManager.resetTxtNLvl();
-            AscensionManager.disableAll();
-            if (AscensionMod.isActivated()) {
+            manager.resetTxtNLvl();
+            manager.disableAll();
+            if (manager.isActive) {
                 //Makes sure to disable this check if no extra ascensions are actually above lvl 0
-                AscensionMod.setBool(AscensionManager.isAnyButtonActive());
+                manager.isActive = manager.isAnyButtonActive();
             }
         }
 
@@ -102,13 +108,13 @@ public class CharacterSelectScreenPatch {
 
         @SpirePostfixPatch
         public static void dailyButton() {
-            AscensionManager.p = null;
-            AscensionMod.setBool(false);
+            AscensionMod.p = null;
+            manager.isActive = false;
         }
     }
 
     public static String getClickedName() {
-        return AscensionManager.getClickedButton() != null ? AscensionManager.getClickedButton().name : null;
+        return manager.getClickedButton() != null ? manager.getClickedButton().name : null;
     }
 
     public static float getDisplacement() {

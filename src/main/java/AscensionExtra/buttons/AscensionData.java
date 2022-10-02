@@ -1,6 +1,6 @@
 package AscensionExtra.buttons;
 
-import AscensionExtra.AscensionManager;
+import AscensionExtra.AscensionMod;
 import AscensionExtra.util.TexLoader;
 import basemod.ClickableUIElement;
 import com.badlogic.gdx.graphics.Color;
@@ -30,15 +30,17 @@ public class AscensionData extends ClickableUIElement {
     private int unlockedLvls;
     private boolean locked;
     private Color textColor;
-    private Color imageColor;
-    private Color highlightColor = new Color(1.0F, 1.0F, 1.0F, 0.0F);
+    private final Color imageColor;
+    private final Color highlightColor = new Color(1.0F, 1.0F, 1.0F, 0.0F);
+    private final AscensionMod.AscensionManager manager;
 
-    public AscensionData(String img, String id, String name, String[] ascInfo, boolean locked) {
+    public AscensionData(String img, String id, String name, String[] ascInfo, boolean locked, AscensionMod.AscensionManager manager) {
         super((Texture) null, 0.0F, 0.0F, 350.0F, 40.0F);
         this.id = id;
         this.ascInfo = ascInfo;
         this.name = name;
         this.locked = locked;
+        this.manager = manager;
         if (img != null && !img.equals("")) {
             image = TexLoader.getTexture(img);
             imageColor = Color.WHITE;
@@ -47,7 +49,7 @@ public class AscensionData extends ClickableUIElement {
             long lo = 0;
             if (id != null && !id.equals("")) {
                 for (char ch : id.toCharArray()) {
-                    lo = 50*lo + ch + AscensionManager.getSize();
+                    lo = 50*lo + ch + manager.getSize();
                 }
             }
             Random rng = new Random(lo);
@@ -66,7 +68,7 @@ public class AscensionData extends ClickableUIElement {
     private void addNumbersToAscInfo() {
         for (int i = 0; i < ascInfo.length; i++) {
             if (i != ascInfo.length - 1) ascInfo[i] = (i+1) + ". " + ascInfo[i];
-            else ascInfo[i] = (i+1) + ". " + AscensionManager.TEXT[1] + ascInfo[i];
+            else ascInfo[i] = (i+1) + ". " + AscensionMod.TEXT[1] + ascInfo[i];
         }
     }
 
@@ -83,9 +85,9 @@ public class AscensionData extends ClickableUIElement {
     public void updateUnlockable() {
         if (unlockedLvls < ascInfo.length && uniqueCounter == unlockedLvls) {
             try {
-                SpireConfig config = new SpireConfig(MOD_ID, "am-" + id + "-config");
+                SpireConfig config = new SpireConfig(MOD_ID, "am-" + id.replace(":", "") + "-config");
                 config.load();
-                config.setInt("ascensionmanager:" + AscensionManager.p.name() + "_ul", unlockedLvls + 1);
+                config.setInt("ascensionmanager:" + AscensionMod.p.name() + "_ul", unlockedLvls + 1);
                 config.save();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -97,11 +99,11 @@ public class AscensionData extends ClickableUIElement {
         if (locked && uniqueCounter > unlockedLvls) uniqueCounter = unlockedLvls;
         if (uniqueCounter > ascInfo.length) uniqueCounter = ascInfo.length;
         if (uniqueCounter <= 0) uniqueCounter = 0;
-        if (AscensionManager.p != null) {
+        if (AscensionMod.p != null) {
             try {
-                SpireConfig config = new SpireConfig(MOD_ID, "am-" + id + "-config");
+                SpireConfig config = new SpireConfig(MOD_ID, "am-" + id.replace(":", "") + "-config");
                 config.load();
-                config.setInt("ascensionmanager:" + AscensionManager.p.name() + "_uc", uniqueCounter);
+                config.setInt("ascensionmanager:" + AscensionMod.p.name() + "_uc", uniqueCounter);
                 config.save();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -112,12 +114,12 @@ public class AscensionData extends ClickableUIElement {
     public void loadData() {
         uniqueCounter = 0;
         unlockedLvls = locked ? 1 : ascInfo.length;
-        if (AscensionManager.p != null) {
+        if (AscensionMod.p != null) {
             try {
-                SpireConfig config = new SpireConfig(MOD_ID, "am-" + id + "-config");
+                SpireConfig config = new SpireConfig(MOD_ID, "am-" + id.replace(":", "") + "-config");
                 config.load();
-                if (config.has("ascensionmanager:" + AscensionManager.p.name() + "_ul")) unlockedLvls = config.getInt("ascensionmanager:" + AscensionManager.p.name() + "_ul");
-                if (config.has("ascensionmanager:" + AscensionManager.p.name() + "_uc")) uniqueCounter = config.getInt("ascensionmanager:" + AscensionManager.p.name() + "_uc");
+                if (config.has("ascensionmanager:" + AscensionMod.p.name() + "_ul")) unlockedLvls = config.getInt("ascensionmanager:" + AscensionMod.p.name() + "_ul");
+                if (config.has("ascensionmanager:" + AscensionMod.p.name() + "_uc")) uniqueCounter = config.getInt("ascensionmanager:" + AscensionMod.p.name() + "_uc");
                 if (unlockedLvls > ascInfo.length) unlockedLvls = ascInfo.length;
                 if (uniqueCounter > unlockedLvls) uniqueCounter = unlockedLvls;
             } catch (Exception e) {
@@ -140,15 +142,15 @@ public class AscensionData extends ClickableUIElement {
     protected void onClick() {
         clicked = !clicked;
         if (clicked) {
-            AscensionManager.disableButtons(this);
+            manager.disableButtons(this);
             saveLvl();
             setLvlAndText();
-        } else AscensionManager.resetTxtNLvl();
+        } else manager.resetTxtNLvl();
     }
 
     public void setLvlAndText() {
         CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel = uniqueCounter;
-        CardCrawlGame.mainMenuScreen.charSelectScreen.ascLevelInfoString = uniqueCounter > 0 ? ascInfo[uniqueCounter - 1] : AscensionManager.TEXT[0];
+        CardCrawlGame.mainMenuScreen.charSelectScreen.ascLevelInfoString = uniqueCounter > 0 ? ascInfo[uniqueCounter - 1] : AscensionMod.TEXT[0];
     }
 
     public void unlock() {
@@ -157,10 +159,10 @@ public class AscensionData extends ClickableUIElement {
         unlockedLvls = ascInfo.length - 1;
         uniqueCounter = unlockedLvls;
         for (AbstractPlayer.PlayerClass p : AbstractPlayer.PlayerClass.values()) {
-            AscensionManager.p = p;
+            AscensionMod.p = p;
             updateUnlockable();
         }
-        AscensionManager.p = null;
+        AscensionMod.p = null;
         uniqueCounter = tmp;
     }
 

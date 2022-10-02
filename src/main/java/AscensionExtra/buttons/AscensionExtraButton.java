@@ -1,6 +1,5 @@
 package AscensionExtra.buttons;
 
-import AscensionExtra.AscensionManager;
 import AscensionExtra.AscensionMod;
 import basemod.ClickableUIElement;
 import com.badlogic.gdx.graphics.Color;
@@ -12,17 +11,19 @@ import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.TipHelper;
 
 public class AscensionExtraButton extends ClickableUIElement {
-    public static float width = FontHelper.getSmartWidth(FontHelper.cardTitleFont, AscensionManager.TEXT[2], 9999.0F, 0.0F);
+    public static float width = FontHelper.getSmartWidth(FontHelper.cardTitleFont, AscensionMod.TEXT[2], 9999.0F, 0.0F);
 
     public boolean clicked;
     private boolean hovered;
     private Color textColor;
-    private Texture check;
+    private final Texture check;
+    private final AscensionMod.AscensionManager manager;
 
-    public AscensionExtraButton() {
+    public AscensionExtraButton(AscensionMod.AscensionManager manager) {
         super(ImageMaster.OPTION_TOGGLE, 0.0F, 0.0F, ImageMaster.OPTION_TOGGLE.getWidth() * 4.0F, ImageMaster.OPTION_TOGGLE.getHeight() * 2.0F);
         textColor = Settings.GREEN_TEXT_COLOR;
         check = ImageMaster.OPTION_TOGGLE_ON;
+        this.manager = manager;
     }
 
     @Override
@@ -32,7 +33,7 @@ public class AscensionExtraButton extends ClickableUIElement {
         else textColor = Settings.GOLD_COLOR;
         if (!clicked || !isClickable()) {
             clicked = false;
-            AscensionManager.disableButtons(null);
+            manager.disableButtons(null);
         }
     }
 
@@ -49,12 +50,12 @@ public class AscensionExtraButton extends ClickableUIElement {
     @Override
     protected void onClick() {
         clicked = !clicked;
-        AscensionMod.setBool(clicked);
+        manager.isActive = clicked;
         if (clicked) {
-            AscensionManager.loadAllButtons();
-            AscensionManager.activateAndSetNextPageFirstButton();
+            manager.loadAllButtons();
+            manager.activateAndSetNextPageFirstButton();
         }
-        else AscensionManager.resetTxtNLvl();
+        else manager.resetTxtNLvl();
     }
 
     @Override
@@ -72,8 +73,8 @@ public class AscensionExtraButton extends ClickableUIElement {
             halfHeight = (float)check.getHeight() / 2.0F;
             sb.draw(check, x - halfWidth + halfWidth * Settings.scale, y - halfHeight + (hb_h / 2.0F), halfWidth, halfHeight, (float)check.getWidth(), (float)check.getHeight(), Settings.scale, Settings.scale, angle, 0, 0, check.getWidth(), check.getHeight(), false, false);
         }
-        FontHelper.renderFontCentered(sb, FontHelper.cardTitleFont, AscensionManager.TEXT[2], x + width, y + (hb_h / 2.0F), textColor);
-        if (hovered) TipHelper.renderGenericTip(x - 140.0F * Settings.scale, y + 340.0F * Settings.scale, AscensionManager.TEXT[3], AscensionManager.TEXT[4]);
+        FontHelper.renderFontCentered(sb, FontHelper.cardTitleFont, AscensionMod.TEXT[2], x + width, y + (hb_h / 2.0F), textColor);
+        if (hovered) TipHelper.renderGenericTip(x - 140.0F * Settings.scale, y + 340.0F * Settings.scale, AscensionMod.TEXT[3], AscensionMod.TEXT[4]);
         renderHitbox(sb);
     }
 }

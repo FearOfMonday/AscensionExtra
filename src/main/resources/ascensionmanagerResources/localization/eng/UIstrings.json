@@ -6,12 +6,14 @@
 	  "Extra",
 	  "Extra Ascensions",
 	  "Here you can select and manage all additional ascension mods downloaded",
-	  "Reset all"
+	  "Reset all",
+	  " NL NL -Click to view other active modifiers-"
     ]
   },
     "${ModID}:ModSettings": {
     "TEXT": [
-      "Instantly unlock the following ascension modifiers: "
+      "Instantly unlock all levels on the following mods: ",
+	  "None..."
     ]
   }
 }

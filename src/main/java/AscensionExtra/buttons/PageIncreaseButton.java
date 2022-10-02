@@ -1,6 +1,6 @@
 package AscensionExtra.buttons;
 
-import AscensionExtra.AscensionManager;
+import AscensionExtra.AscensionMod;
 import AscensionExtra.util.TexLoader;
 import basemod.ClickableUIElement;
 import com.badlogic.gdx.graphics.Color;
@@ -17,10 +17,12 @@ public class PageIncreaseButton extends ClickableUIElement {
     protected boolean clicked;
     private boolean hovered;
     private Color drawColor;
+    private final AscensionMod.AscensionManager manager;
 
-    public PageIncreaseButton() {
+    public PageIncreaseButton(AscensionMod.AscensionManager manager) {
         super(arrow);
         drawColor = Color.WHITE;
+        this.manager = manager;
     }
 
     @Override
@@ -30,9 +32,10 @@ public class PageIncreaseButton extends ClickableUIElement {
         else drawColor = Color.LIGHT_GRAY;
         if (clicked) {
             clicked = false;
-            AscensionManager.disableButtons(null);
-            AscensionManager.incrementPageIndex();
-            AscensionManager.activateAndSetNextPageFirstButton();
+            manager.pageIndex++;
+            if (manager.pageIndex > manager.maxPages) manager.pageIndex = 0;
+            manager.disableButtons(null);
+            manager.activateAndSetNextPageFirstButton();
         }
     }
 
@@ -54,6 +57,6 @@ public class PageIncreaseButton extends ClickableUIElement {
     @Override
     public void render(SpriteBatch sb) {
         super.render(sb, drawColor);
-        FontHelper.renderFontRightAligned(sb, FontHelper.cardTitleFont, AscensionManager.getIndexes()[0] + "/" + AscensionManager.getIndexes()[1], x, y + 32 * Settings.scale, Color.SKY);
+        FontHelper.renderFontRightAligned(sb, FontHelper.cardTitleFont, manager.pageIndex + "/" + manager.maxPages, x, y + 32 * Settings.scale, Color.SKY);
     }
 }

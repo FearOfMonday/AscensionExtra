@@ -1,6 +1,6 @@
 package AscensionExtra.patches;
 
-import AscensionExtra.AscensionManager;
+import AscensionExtra.AscensionMod;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePatch2;
 import com.evacipated.cardcrawl.modthespire.lib.SpirePostfixPatch;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
@@ -12,15 +12,22 @@ import com.megacrit.cardcrawl.screens.VictoryScreen;
 
 import static com.megacrit.cardcrawl.screens.GameOverScreen.isVictory;
 
+@SuppressWarnings("unused")
 public class SaveProgressPatch {
+
+    private static AscensionMod.AscensionManager manager;
+
+    public static void addManager(AscensionMod.AscensionManager man) {
+        manager = man;
+    }
 
     @SpirePatch2(clz = CardCrawlGame.class, method = "loadPlayerSave")
     public static class LoadCurrentPlayer {
 
         @SpirePostfixPatch
         public static void loader(AbstractPlayer p) {
-            AscensionManager.p = p.chosenClass;
-            AscensionManager.loadAllButtons();
+            AscensionMod.p = p.chosenClass;
+            manager.loadAllButtons();
         }
     }
 
@@ -29,7 +36,7 @@ public class SaveProgressPatch {
 
         @SpirePostfixPatch
         public static void death() {
-            if ((isVictory || AbstractDungeon.actNum >= 4) && AbstractDungeon.isAscensionMode && Settings.isStandardRun()) AscensionManager.saveAfterRun();
+            if ((isVictory || AbstractDungeon.actNum >= 4) && AbstractDungeon.isAscensionMode && Settings.isStandardRun()) manager.saveAfterRun();
         }
     }
 
@@ -38,7 +45,7 @@ public class SaveProgressPatch {
 
         @SpirePostfixPatch
         public static void victory() {
-            if (AbstractDungeon.isAscensionMode && !Settings.seedSet && !Settings.isTrial) AscensionManager.saveAfterRun();
+            if (AbstractDungeon.isAscensionMode && !Settings.seedSet && !Settings.isTrial) manager.saveAfterRun();
         }
     }
 }

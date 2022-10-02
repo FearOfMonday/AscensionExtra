@@ -1,6 +1,5 @@
 package AscensionExtra.buttons;
 
-import AscensionExtra.AscensionManager;
 import AscensionExtra.AscensionMod;
 import basemod.ClickableUIElement;
 import com.badlogic.gdx.graphics.Color;
@@ -14,11 +13,13 @@ public class DisableAllButton extends ClickableUIElement {
     private boolean hovered;
     private Color textColor;
     private Color drawColor;
+    private final AscensionMod.AscensionManager manager;
 
-    public DisableAllButton() {
+    public DisableAllButton(AscensionMod.AscensionManager manager) {
         super(ImageMaster.OPTION_YES);
         textColor = Settings.CREAM_COLOR;
         drawColor = Color.WHITE;
+        this.manager = manager;
     }
 
     @Override
@@ -34,9 +35,14 @@ public class DisableAllButton extends ClickableUIElement {
         }
         if (clicked) {
             clicked = false;
-            AscensionMod.setBool(false);
-            AscensionManager.resetButtons();
-            AscensionManager.resetTxtNLvl();
+            manager.isActive = false;
+            for (AscensionData d : manager.data) {
+                d.clicked = false;
+                d.uniqueCounter = 0;
+                d.saveLvl();
+                d.update();
+            }
+            manager.resetTxtNLvl();
         }
     }
 
@@ -58,6 +64,6 @@ public class DisableAllButton extends ClickableUIElement {
     @Override
     public void render(SpriteBatch sb) {
         super.render(sb, drawColor);
-        FontHelper.renderFontCentered(sb, FontHelper.cardTitleFont, AscensionManager.TEXT[5], x + ((image.getWidth() / 2.0F) - 12) * Settings.scale, y + (image.getHeight() / 2.0F) * Settings.scale, textColor);
+        FontHelper.renderFontCentered(sb, FontHelper.cardTitleFont, AscensionMod.TEXT[5], x + ((image.getWidth() / 2.0F) - 12) * Settings.scale, y + (image.getHeight() / 2.0F) * Settings.scale, textColor);
     }
 }

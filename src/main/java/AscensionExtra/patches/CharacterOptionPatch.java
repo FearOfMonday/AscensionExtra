@@ -1,6 +1,5 @@
 package AscensionExtra.patches;
 
-import AscensionExtra.AscensionManager;
 import AscensionExtra.AscensionMod;
 import AscensionExtra.buttons.AscensionData;
 import com.evacipated.cardcrawl.modthespire.lib.*;
@@ -9,24 +8,31 @@ import com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterSelectScreen;
 import javassist.CtBehavior;
 
+@SuppressWarnings("unused")
 public class CharacterOptionPatch {
+
+    private static AscensionMod.AscensionManager manager;
+
+    public static void addManager(AscensionMod.AscensionManager man) {
+        manager = man;
+    }
 
     @SpirePatch2(clz = CharacterOption.class, method = "incrementAscensionLevel")
     public static class incrementExtraAsc {
 
         @SpirePrefixPatch
         public static SpireReturn<Void> incrememt(int level) {
-            if (AscensionMod.isActivated()) {
-                AscensionData data = AscensionManager.getClickedButton();
+            if (manager.isActive) {
+                AscensionData data = manager.getClickedButton();
                 if (data != null) {
-                    AscensionManager.setLvl(data, level);
+                    manager.setLvl(data, level);
                     return SpireReturn.Return(null);
                 } else {
-                    AscensionManager.regularAscLevel = level;
+                    manager.regularAscLevel = level;
                     return SpireReturn.Continue();
                 }
             } else {
-                AscensionManager.regularAscLevel = level;
+                manager.regularAscLevel = level;
                 return SpireReturn.Continue();
             }
         }
@@ -37,17 +43,17 @@ public class CharacterOptionPatch {
 
         @SpirePrefixPatch
         public static SpireReturn<Void> decrement(int level) {
-            if (AscensionMod.isActivated()) {
-                AscensionData data = AscensionManager.getClickedButton();
+            if (manager.isActive) {
+                AscensionData data = manager.getClickedButton();
                 if (data != null) {
-                    AscensionManager.setLvl(data, level);
+                    manager.setLvl(data, level);
                     return SpireReturn.Return(null);
                 } else {
-                    AscensionManager.regularAscLevel = level;
+                    manager.regularAscLevel = level;
                     return SpireReturn.Continue();
                 }
             } else {
-                AscensionManager.regularAscLevel = level;
+                manager.regularAscLevel = level;
                 return SpireReturn.Continue();
             }
         }
@@ -57,11 +63,11 @@ public class CharacterOptionPatch {
     public static class updateForCharacterSwitch {
         @SpireInsertPatch(locator = Locator.class, localvars = {"pref"})
         public static SpireReturn<Void> notSorryForThis(CharacterOption __instance) {
-            AscensionManager.p = __instance.c.chosenClass;
-            AscensionManager.regularAscLevel = CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel;
-            if (AscensionMod.isActivated()) {
-                AscensionManager.loadAllButtons();
-                AscensionData data = AscensionManager.getClickedButton();
+            AscensionMod.p = __instance.c.chosenClass;
+            manager.regularAscLevel = CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel;
+            if (manager.isActive) {
+                manager.loadAllButtons();
+                AscensionData data = manager.getClickedButton();
                 if (data != null) {
                     data.setLvlAndText();
                     return SpireReturn.Return(null);
