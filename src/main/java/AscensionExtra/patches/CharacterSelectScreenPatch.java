@@ -48,10 +48,10 @@ public class CharacterSelectScreenPatch {
         public static int counter = 3;
 
         @SpirePrefixPatch
-        public static void buttona(CharacterSelectScreen __instance, @ByRef SpriteBatch[] sb) {
+        public static void buttona(CharacterSelectScreen __instance, SpriteBatch sb) {
             if (__instance.isAscensionMode) AbstractDungeon.ascensionLevel = CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel;
             if (AscensionMod.p != null && manager.hasButtons()) {
-                manager.render(sb[0]);
+                manager.render(sb);
             }
         }
 

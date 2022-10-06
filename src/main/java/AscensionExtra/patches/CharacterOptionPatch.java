@@ -5,6 +5,7 @@ import AscensionExtra.buttons.AscensionData;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
+import com.megacrit.cardcrawl.screens.charSelect.CharacterSelectScreen;
 import javassist.CtBehavior;
 
 @SuppressWarnings("unused")
@@ -97,7 +98,7 @@ public class CharacterOptionPatch {
 
         private static class Locator extends SpireInsertLocator {
             public int[] Locate(CtBehavior ctMethodToPatch) throws Exception {
-                Matcher.FieldAccessMatcher matcher = new Matcher.FieldAccessMatcher(CharacterOption.class, "maxAscensionLevel");
+                Matcher.FieldAccessMatcher matcher = new Matcher.FieldAccessMatcher(CharacterSelectScreen.class, "ascensionLevel");
                 return LineFinder.findInOrder(ctMethodToPatch, matcher);
             }
         }
