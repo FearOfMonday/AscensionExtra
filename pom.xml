@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>AscensionManager</groupId>
     <artifactId>AscensionManager</artifactId>
-    <version>1.0.0</version>
+    <version>1.2.0</version>
     <name>Ascension Manager</name>
     <description>Allows for multiple custom Ascension to be registered and used simultaneously without conflict, similar to Hades' heat system.</description>
     <!-- Change the above for mod information. -->
