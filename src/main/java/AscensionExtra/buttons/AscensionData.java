@@ -149,7 +149,6 @@ public class AscensionData extends ClickableUIElement {
     }
 
     public void setLvlAndText() {
-        CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel = uniqueCounter;
         CardCrawlGame.mainMenuScreen.charSelectScreen.ascLevelInfoString = uniqueCounter > 0 ? ascInfo[uniqueCounter - 1] : AscensionMod.TEXT[0];
     }
 

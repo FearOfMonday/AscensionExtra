@@ -11,6 +11,9 @@
   "dependencies": [
     "basemod"
   ],
+  "optional_dependencies": [
+    "AscensionPlus"
+  ],
   "credits": "DarkVexon for their pro template, Modding community for their invaluable resources and knowledge."
 }
 

@@ -147,7 +147,6 @@ public class AscensionMod implements EditStringsSubscriber, PostInitializeSubscr
             for (AscensionData d : manager.data) {
                 if (d.id.equals(id)) return d;
             }
-
         }
         return null;
     }
@@ -175,11 +174,13 @@ public class AscensionMod implements EditStringsSubscriber, PostInitializeSubscr
     public static class AscensionManager implements CustomSavable<Boolean> {
         public boolean isActive;
         public ArrayList<AscensionData> data;
-        public int regularAscLevel;
         public int pageIndex;
         public int maxPages;
         public int viewIndex;
         public String[] ascTexts;
+
+        public String previousAscensionMsg;
+        public int prevAscLvl;
 
         private final AscensionExtraButton exButton;
         private final PageIncreaseButton pIncreaseButton;
@@ -194,7 +195,8 @@ public class AscensionMod implements EditStringsSubscriber, PostInitializeSubscr
             maxPages = 0;
             viewIndex = 0;
             data = new ArrayList<>();
-            regularAscLevel = 0;
+            previousAscensionMsg = "";
+            prevAscLvl = 0;
         }
 
         public void initButtons() {
@@ -211,17 +213,17 @@ public class AscensionMod implements EditStringsSubscriber, PostInitializeSubscr
             }
         }
 
-        public void resetTxtNLvl() {
-            if (regularAscLevel > 20) regularAscLevel = 20;
-            if (regularAscLevel < 1) regularAscLevel = 1;
-            CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel = regularAscLevel;
-            CardCrawlGame.mainMenuScreen.charSelectScreen.ascLevelInfoString = CharacterSelectScreen.A_TEXT[regularAscLevel - 1];
+        public void saveOldTxt() {
+            previousAscensionMsg = CardCrawlGame.mainMenuScreen.charSelectScreen.ascLevelInfoString;
         }
 
-        public void setLvl(AscensionData d, int lvl) {
-            d.uniqueCounter = lvl;
+        public void resetTxtNLvl() {
+            CardCrawlGame.mainMenuScreen.charSelectScreen.ascLevelInfoString = previousAscensionMsg;
+        }
+
+        public void setLvl(AscensionData d, int mod) {
+            d.uniqueCounter += mod;
             d.saveLvl();
-            d.setLvlAndText();
         }
 
         public void buildStrings() {
@@ -277,11 +279,6 @@ public class AscensionMod implements EditStringsSubscriber, PostInitializeSubscr
             return !data.isEmpty();
         }
 
-        public void disableAll() {
-            exButton.clicked = false;
-            disableButtons(null);
-        }
-
         public void disableButtons(AscensionData exception) {
             for (AscensionData d : data) {
                 if (d != exception) {
@@ -289,6 +286,12 @@ public class AscensionMod implements EditStringsSubscriber, PostInitializeSubscr
                     d.update();
                 }
             }
+        }
+
+        public void disableExtraButton() {
+            exButton.clicked = false;
+            exButton.update();
+            resetTxtNLvl();
         }
 
         public void loadAllButtons() {

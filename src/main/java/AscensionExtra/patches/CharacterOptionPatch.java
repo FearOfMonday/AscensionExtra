@@ -5,7 +5,6 @@ import AscensionExtra.buttons.AscensionData;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
-import com.megacrit.cardcrawl.screens.charSelect.CharacterSelectScreen;
 import javassist.CtBehavior;
 
 @SuppressWarnings("unused")
@@ -21,20 +20,26 @@ public class CharacterOptionPatch {
     public static class incrementExtraAsc {
 
         @SpirePrefixPatch
-        public static SpireReturn<Void> incrememt(int level) {
+        public static void increment(@ByRef Integer[] level) {
             if (manager.isActive) {
                 AscensionData data = manager.getClickedButton();
                 if (data != null) {
-                    manager.setLvl(data, level);
-                    return SpireReturn.Return(null);
-                } else {
-                    manager.regularAscLevel = level;
-                    return SpireReturn.Continue();
-                }
-            } else {
-                manager.regularAscLevel = level;
-                return SpireReturn.Continue();
-            }
+                    if (manager.prevAscLvl != level[0]) level[0] = manager.prevAscLvl;
+                    data.uniqueCounter += 1;
+                    data.saveLvl();
+                    data.setLvlAndText();
+                } else manager.saveOldTxt();
+            } else manager.saveOldTxt();
+        }
+
+        @SpirePostfixPatch
+        public static void secondaryTextUpdateToEnsureThatMyTextWins(@ByRef Integer[] level) {
+            if (manager.isActive) {
+                AscensionData data = manager.getClickedButton();
+                if (data != null) data.setLvlAndText();
+                else manager.saveOldTxt();
+            } else manager.saveOldTxt();
+            manager.prevAscLvl = level[0];
         }
     }
 
@@ -42,44 +47,57 @@ public class CharacterOptionPatch {
     public static class DecrementExtraAsc {
 
         @SpirePrefixPatch
-        public static SpireReturn<Void> decrement(int level) {
+        public static void decrement(@ByRef Integer[] level) {
             if (manager.isActive) {
                 AscensionData data = manager.getClickedButton();
                 if (data != null) {
-                    manager.setLvl(data, level);
-                    return SpireReturn.Return(null);
-                } else {
-                    manager.regularAscLevel = level;
-                    return SpireReturn.Continue();
-                }
-            } else {
-                manager.regularAscLevel = level;
-                return SpireReturn.Continue();
-            }
+                    if (manager.prevAscLvl != level[0]) level[0] = manager.prevAscLvl;
+                    data.uniqueCounter -= 1;
+                    data.saveLvl();
+                    data.setLvlAndText();
+                } else manager.saveOldTxt();
+            } else manager.saveOldTxt();
+        }
+
+        @SpirePostfixPatch
+        public static void secondaryTextUpdateToEnsureThatMyTextWins(@ByRef Integer[] level) {
+            if (manager.isActive) {
+                AscensionData data = manager.getClickedButton();
+                if (data != null) data.setLvlAndText();
+                else manager.saveOldTxt();
+            } else manager.saveOldTxt();
+            manager.prevAscLvl = level[0];
         }
     }
 
     @SpirePatch2(clz = CharacterOption.class, method = "updateHitbox")
     public static class updateForCharacterSwitch {
-        @SpireInsertPatch(locator = Locator.class, localvars = {"pref"})
-        public static SpireReturn<Void> notSorryForThis(CharacterOption __instance) {
+
+        public static boolean iAmASwitch = false;
+
+        @SpireInsertPatch(locator = Locator.class)
+        public static void preBool(CharacterOption __instance) {
             AscensionMod.p = __instance.c.chosenClass;
-            manager.regularAscLevel = CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel;
-            if (manager.isActive) {
-                manager.loadAllButtons();
-                AscensionData data = manager.getClickedButton();
-                if (data != null) {
-                    data.setLvlAndText();
-                    return SpireReturn.Return(null);
-                } else return SpireReturn.Continue();
-            } else {
-                return SpireReturn.Continue();
+            iAmASwitch = true;
+        }
+
+        @SpirePostfixPatch
+        public static void afterBool() {
+            if (iAmASwitch) {
+                manager.prevAscLvl = CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel;
+                manager.saveOldTxt();
+                if (manager.isActive) {
+                    manager.loadAllButtons();
+                    AscensionData data = manager.getClickedButton();
+                    if (data != null) data.setLvlAndText();
+                }
+                iAmASwitch = false;
             }
         }
 
         private static class Locator extends SpireInsertLocator {
             public int[] Locate(CtBehavior ctMethodToPatch) throws Exception {
-                Matcher.FieldAccessMatcher matcher = new Matcher.FieldAccessMatcher(CharacterSelectScreen.class, "A_TEXT");
+                Matcher.FieldAccessMatcher matcher = new Matcher.FieldAccessMatcher(CharacterOption.class, "maxAscensionLevel");
                 return LineFinder.findInOrder(ctMethodToPatch, matcher);
             }
         }

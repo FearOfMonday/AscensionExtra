@@ -3,6 +3,7 @@ package AscensionExtra.patches;
 import AscensionExtra.AscensionMod;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
+import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterSelectScreen;
@@ -44,10 +45,11 @@ public class CharacterSelectScreenPatch {
     @SpirePatch2(clz = CharacterSelectScreen.class, method = "renderAscensionMode")
     public static class DisplayButtons {
 
-        public static int counter = 2;
+        public static int counter = 3;
 
-        @SpirePostfixPatch
-        public static void buttona(@ByRef SpriteBatch[] sb) {
+        @SpirePrefixPatch
+        public static void buttona(CharacterSelectScreen __instance, @ByRef SpriteBatch[] sb) {
+            if (__instance.isAscensionMode) AbstractDungeon.ascensionLevel = CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel;
             if (AscensionMod.p != null && manager.hasButtons()) {
                 manager.render(sb[0]);
             }
@@ -59,9 +61,14 @@ public class CharacterSelectScreenPatch {
                 public void edit(MethodCall m) throws CannotCompileException {
                     if (m.getMethodName().equals("renderFontCentered") && counter > 0) {
                         counter--;
-                        m.replace("if (" + CharacterSelectScreenPatch.class.getName() + ".getClickedName() != null) {$proceed($1, $2, " +
-                                CharacterSelectScreenPatch.class.getName() + ".getClickedName(), " +
-                                CharacterSelectScreenPatch.class.getName() + ".getDisplacement(), $5, $6);} else {$proceed($$);}");
+                        if (counter == 0) {
+                            m.replace("if (" + CharacterSelectScreenPatch.class.getName() + ".getClickedName() != null) {$proceed($1, $2, "
+                                    + CharacterSelectScreenPatch.class.getName() + ".getLvl(), $4, $5, $6);} else {$proceed($$);}");
+                        } else {
+                            m.replace("if (" + CharacterSelectScreenPatch.class.getName() + ".getClickedName() != null) {$proceed($1, $2, " +
+                                    CharacterSelectScreenPatch.class.getName() + ".getClickedName(), " +
+                                    CharacterSelectScreenPatch.class.getName() + ".getDisplacement(), $5, $6);} else {$proceed($$);}");
+                        }
                     }
                 }
             };
@@ -74,14 +81,13 @@ public class CharacterSelectScreenPatch {
         @SpireInsertPatch(locator = Locator.class)
         public static void hideExButtonWhenCancel() {
             AscensionMod.p = null;
-            manager.disableAll();
+            manager.disableExtraButton();
+            manager.disableButtons(null);
             manager.isActive = false;
         }
 
         @SpireInsertPatch(locator = Locator2.class)
-        public static void restoreAscensionLevelWhenProgress() {
-            manager.resetTxtNLvl();
-            manager.disableAll();
+        public static void updateWhenProgress() {
             if (manager.isActive) {
                 //Makes sure to disable this check if no extra ascensions are actually above lvl 0
                 manager.isActive = manager.isAnyButtonActive();
@@ -109,8 +115,14 @@ public class CharacterSelectScreenPatch {
         @SpirePostfixPatch
         public static void dailyButton() {
             AscensionMod.p = null;
+            manager.disableExtraButton();
+            manager.disableButtons(null);
             manager.isActive = false;
         }
+    }
+
+    public static String getLvl() {
+        return CharacterSelectScreen.TEXT[7] + (manager.getClickedButton() != null ? manager.getClickedButton().uniqueCounter : 0);
     }
 
     public static String getClickedName() {

@@ -26,8 +26,10 @@ public class TopPanelPatch {
 
         @SpirePostfixPatch
         public static void build(@ByRef String[] ___ascensionString) {
-            ___ascensionString[0] += CardCrawlGame.languagePack.getUIString("ascensionmanager:AscensionPrefix").TEXT[6];
-            manager.buildStrings();
+            if (manager.isActive) {
+                ___ascensionString[0] += CardCrawlGame.languagePack.getUIString("ascensionmanager:AscensionPrefix").TEXT[6];
+                manager.buildStrings();
+            }
         }
     }
 

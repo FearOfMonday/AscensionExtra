@@ -35,6 +35,7 @@ public class AscensionExtraButton extends ClickableUIElement {
             clicked = false;
             manager.disableButtons(null);
         }
+        manager.isActive = clicked;
     }
 
     @Override
@@ -50,7 +51,6 @@ public class AscensionExtraButton extends ClickableUIElement {
     @Override
     protected void onClick() {
         clicked = !clicked;
-        manager.isActive = clicked;
         if (clicked) {
             manager.loadAllButtons();
             manager.activateAndSetNextPageFirstButton();
