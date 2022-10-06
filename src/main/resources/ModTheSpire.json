@@ -13,7 +13,8 @@
   ],
   "optional_dependencies": [
     "AscensionPlus",
-    "ascensionmod"
+    "ascensionmod",
+    "mintyspire"
   ],
   "credits": "DarkVexon for their pro template, Modding community for their invaluable resources and knowledge."
 }

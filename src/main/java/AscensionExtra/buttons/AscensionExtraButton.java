@@ -60,7 +60,8 @@ public class AscensionExtraButton extends ClickableUIElement {
 
     @Override
     public void render(SpriteBatch sb) {
-        sb.setColor(Color.WHITE);
+        if (isClickable()) sb.setColor(Color.WHITE);
+        else sb.setColor(Color.GRAY);
         float halfWidth;
         float halfHeight;
         if (image != null) {

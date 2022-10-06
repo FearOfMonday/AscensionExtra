@@ -1,11 +1,15 @@
 package AscensionExtra.patches;
 
 import AscensionExtra.AscensionMod;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.Hitbox;
+import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.screens.charSelect.CharacterOption;
 import com.megacrit.cardcrawl.screens.charSelect.CharacterSelectScreen;
 import com.megacrit.cardcrawl.screens.mainMenu.MainMenuScreen;
 import javassist.CannotCompileException;
@@ -32,12 +36,26 @@ public class CharacterSelectScreenPatch {
     }
 
     @SpirePatch2(clz = CharacterSelectScreen.class, method = "updateAscensionToggle")
-    public static class UpdateButtons {
+    public static class MixOfPatches {
+
+        public static boolean extendedClick = false;
+
+        @SpireInsertPatch(locator = Locator.class)
+        public static void workAroundForMinty() {
+            extendedClick = true;
+        }
+
 
         @SpirePostfixPatch
-        public static void buttona(CharacterSelectScreen __instance) {
-            if (AscensionMod.p != null && manager.hasButtons()) {
-                manager.update(__instance);
+        public static void buttonLogic(CharacterSelectScreen __instance) {
+            if (extendedClick) additionalUpdate(__instance);
+            if (AscensionMod.p != null && manager.hasButtons()) manager.update(__instance);
+        }
+
+        private static class Locator extends SpireInsertLocator {
+            public int[] Locate(CtBehavior ctMethodToPatch) throws Exception {
+                Matcher.FieldAccessMatcher fieldAccessMatcher = new Matcher.FieldAccessMatcher(CharacterSelectScreen.class, "options");
+                return new int[] {LineFinder.findAllInOrder(ctMethodToPatch, fieldAccessMatcher)[1]};
             }
         }
     }
@@ -48,10 +66,20 @@ public class CharacterSelectScreenPatch {
         public static int counter = 3;
 
         @SpirePrefixPatch
-        public static void buttona(CharacterSelectScreen __instance, SpriteBatch sb) {
+        public static void renderButtons(CharacterSelectScreen __instance, SpriteBatch sb) {
             if (__instance.isAscensionMode) AbstractDungeon.ascensionLevel = CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel;
-            if (AscensionMod.p != null && manager.hasButtons()) {
-                manager.render(sb);
+            if (AscensionMod.p != null && manager.hasButtons()) manager.render(sb);
+        }
+
+        @SpirePostfixPatch
+        public static void renderArrowAgainBecauseOfMinty(Hitbox ___ascRightHb, SpriteBatch sb) {
+            if (getClickedName() != null) {
+                if (!___ascRightHb.hovered && !Settings.isControllerMode) {
+                    sb.setColor(Color.LIGHT_GRAY);
+                } else {
+                    sb.setColor(Color.WHITE);
+                }
+                sb.draw(ImageMaster.CF_RIGHT_ARROW, ___ascRightHb.cX - 24.0F, ___ascRightHb.cY - 24.0F, 24.0F, 24.0F, 48.0F, 48.0F, Settings.scale, Settings.scale, 0.0F, 0, 0, 48, 48, false, false);
             }
         }
 
@@ -63,7 +91,7 @@ public class CharacterSelectScreenPatch {
                         counter--;
                         if (counter == 0) {
                             m.replace("if (" + CharacterSelectScreenPatch.class.getName() + ".getClickedName() != null) {$proceed($1, $2, "
-                                    + CharacterSelectScreenPatch.class.getName() + ".getLvl(), $4, $5, $6);} else {$proceed($$);}");
+                                    + CharacterSelectScreenPatch.class.getName() + ".getLvl(), $4, $5, " + Settings.class.getName() + ".BLUE_TEXT_COLOR);} else {$proceed($$);}");
                         } else {
                             m.replace("if (" + CharacterSelectScreenPatch.class.getName() + ".getClickedName() != null) {$proceed($1, $2, " +
                                     CharacterSelectScreenPatch.class.getName() + ".getClickedName(), " +
@@ -133,4 +161,12 @@ public class CharacterSelectScreenPatch {
         return (Settings.WIDTH / 2.0F);
     }
 
+    public static void additionalUpdate(CharacterSelectScreen ch) {
+        for (CharacterOption o : ch.options) {
+            if (o.selected) {
+                o.incrementAscensionLevel(ch.ascensionLevel + 1);
+                break;
+            }
+        }
+    }
 }

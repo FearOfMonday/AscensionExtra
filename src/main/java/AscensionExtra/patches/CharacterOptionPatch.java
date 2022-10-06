@@ -22,6 +22,7 @@ public class CharacterOptionPatch {
 
         @SpirePrefixPatch
         public static void increment(@ByRef Integer[] level) {
+            CharacterSelectScreenPatch.MixOfPatches.extendedClick = false;
             if (manager.isActive) {
                 AscensionData data = manager.getClickedButton();
                 if (data != null) {
@@ -34,13 +35,13 @@ public class CharacterOptionPatch {
         }
 
         @SpirePostfixPatch
-        public static void secondaryTextUpdateToEnsureThatMyTextWins(@ByRef Integer[] level) {
+        public static void secondaryTextUpdateToEnsureThatMyTextWins() {
             if (manager.isActive) {
                 AscensionData data = manager.getClickedButton();
                 if (data != null) data.setLvlAndText();
                 else manager.saveOldTxt();
             } else manager.saveOldTxt();
-            manager.prevAscLvl = level[0];
+            manager.prevAscLvl = CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel;
         }
     }
 
@@ -61,13 +62,13 @@ public class CharacterOptionPatch {
         }
 
         @SpirePostfixPatch
-        public static void secondaryTextUpdateToEnsureThatMyTextWins(@ByRef Integer[] level) {
+        public static void secondaryTextUpdateToEnsureThatMyTextWins() {
             if (manager.isActive) {
                 AscensionData data = manager.getClickedButton();
                 if (data != null) data.setLvlAndText();
                 else manager.saveOldTxt();
             } else manager.saveOldTxt();
-            manager.prevAscLvl = level[0];
+            manager.prevAscLvl = CardCrawlGame.mainMenuScreen.charSelectScreen.ascensionLevel;
         }
     }
 
